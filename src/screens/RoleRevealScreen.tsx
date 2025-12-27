@@ -19,9 +19,9 @@ export const RoleRevealScreen: React.FC = () => {
   const { state, dispatch, currentPlayer } = useGame();
   const { t } = useLanguage();
   const [isRevealed, setIsRevealed] = useState(false);
+  const [isHiding, setIsHiding] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
 
-  // Block Android back button
   useBlockBackButton(true);
 
   useEffect(() => {
@@ -33,25 +33,36 @@ export const RoleRevealScreen: React.FC = () => {
         useNativeDriver: true,
       }).start();
 
-      if (currentPlayer?.isImpostor) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      } else {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
+      // Same haptic feedback for all roles (to not reveal by sound)
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }, 1500);
 
     return () => clearTimeout(timer);
   }, []);
 
   const handleNext = () => {
-    dispatch({ type: 'PLAYER_SAW_ROLE' });
-
-    const nextIndex = state.currentPlayerIndex + 1;
-    if (nextIndex >= state.players.length) {
-      navigation.navigate('Discussion');
-    } else {
-      navigation.navigate('PassDevice');
-    }
+    // Start hiding animation
+    setIsHiding(true);
+    
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      dispatch({ type: 'PLAYER_SAW_ROLE' });
+      
+      // Small delay before transitioning
+      setTimeout(() => {
+        dispatch({ type: 'HIDE_ROLE' });
+        
+        const nextIndex = state.currentPlayerIndex + 1;
+        if (nextIndex >= state.players.length) {
+          navigation.navigate('Discussion');
+        } else {
+          navigation.navigate('PassDevice');
+        }
+      }, 500);
+    });
   };
 
   if (!currentPlayer) {
@@ -60,15 +71,31 @@ export const RoleRevealScreen: React.FC = () => {
 
   const isImpostor = currentPlayer.isImpostor;
 
+  // Show hiding screen during transition
+  if (isHiding) {
+    return (
+      <ScreenContainer centered>
+        <View style={styles.hidingContainer}>
+          <Text style={styles.hidingText}>{t.roleReveal.hiding}</Text>
+          <View style={styles.loadingDots}>
+            <Text style={styles.dot}>●</Text>
+            <Text style={styles.dot}>●</Text>
+            <Text style={styles.dot}>●</Text>
+          </View>
+        </View>
+      </ScreenContainer>
+    );
+  }
+
   return (
     <ScreenContainer centered>
       <View style={styles.content}>
-        {/* Player Info */}
+        {/* Player Info - Always green/neutral */}
         <View style={styles.playerInfo}>
           <PlayerAvatar
             playerNumber={currentPlayer.id}
             size="lg"
-            variant={isImpostor ? 'eliminated' : 'active'}
+            variant="active"
           />
           <Text style={styles.playerName}>{currentPlayer.displayName}</Text>
         </View>
@@ -85,18 +112,11 @@ export const RoleRevealScreen: React.FC = () => {
           </Card>
         ) : (
           <Animated.View style={[styles.animatedContainer, { opacity: fadeAnim }]}>
-            <Card
-              variant={isImpostor ? 'danger' : 'highlighted'}
-              style={styles.roleCard}
-            >
+            {/* All cards use same styling - no color differentiation */}
+            <Card variant="highlighted" style={styles.roleCard}>
               {/* Role Title */}
               <Text style={styles.roleLabel}>{t.roleReveal.yourRole}</Text>
-              <Text
-                style={[
-                  styles.roleTitle,
-                  isImpostor ? styles.roleTitleDanger : styles.roleTitleSafe,
-                ]}
-              >
+              <Text style={styles.roleTitle}>
                 {isImpostor ? t.roleReveal.impostor : t.roleReveal.crewmate}
               </Text>
 
@@ -105,12 +125,7 @@ export const RoleRevealScreen: React.FC = () => {
 
               {/* Secret Word */}
               <Text style={styles.wordLabel}>{t.roleReveal.secretWord}</Text>
-              <Text
-                style={[
-                  styles.secretWord,
-                  isImpostor && styles.secretWordHidden,
-                ]}
-              >
+              <Text style={styles.secretWord}>
                 {currentPlayer.secretWord}
               </Text>
 
@@ -127,13 +142,13 @@ export const RoleRevealScreen: React.FC = () => {
           </Animated.View>
         )}
 
-        {/* Next Button */}
-        {isRevealed && (
+        {/* Next Button - Always same color */}
+        {isRevealed && !isHiding && (
           <View style={styles.buttonContainer}>
             <Button
               title={t.roleReveal.gotIt}
               onPress={handleNext}
-              variant={isImpostor ? 'danger' : 'primary'}
+              variant="primary"
               size="lg"
               fullWidth
             />
@@ -150,6 +165,15 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: spacing.lg,
     alignItems: 'center',
+  },
+  hidingContainer: {
+    alignItems: 'center',
+  },
+  hidingText: {
+    fontFamily: typography.fonts.mono,
+    fontSize: typography.sizes.lg,
+    color: colors.textSecondary,
+    letterSpacing: 3,
   },
   playerInfo: {
     alignItems: 'center',
@@ -199,13 +223,8 @@ const styles = StyleSheet.create({
   roleTitle: {
     fontFamily: typography.fonts.monoBold,
     fontSize: typography.sizes.xxxl,
-    letterSpacing: 4,
-  },
-  roleTitleSafe: {
     color: colors.primary,
-  },
-  roleTitleDanger: {
-    color: colors.danger,
+    letterSpacing: 4,
   },
   divider: {
     width: '80%',
@@ -224,10 +243,6 @@ const styles = StyleSheet.create({
     fontFamily: typography.fonts.monoBold,
     fontSize: typography.sizes.xxl,
     color: colors.primary,
-  },
-  secretWordHidden: {
-    color: colors.danger,
-    letterSpacing: 4,
   },
   instructions: {
     marginTop: spacing.lg,

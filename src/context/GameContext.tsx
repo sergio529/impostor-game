@@ -3,10 +3,19 @@ import {
   GameState,
   Player,
   Category,
+  VoteRoundResult,
+  GameResult,
   INITIAL_GAME_STATE,
 } from '../types/game';
 import { getRandomWord } from '../data/categories';
-import { determineGameResult, getMaxImpostors } from '../utils/gameLogic';
+import {
+  createPlayers,
+  createRandomPlayerOrder,
+  processVoteRound,
+  getMaxImpostors,
+  resetPlayersForVoting,
+  getAlivePlayers,
+} from '../utils/gameLogic';
 
 // ============================================
 // ACTION TYPES
@@ -21,46 +30,16 @@ type GameAction =
   | { type: 'START_GAME' }
   | { type: 'PLAYER_READY' }
   | { type: 'PLAYER_SAW_ROLE' }
+  | { type: 'HIDE_ROLE' }
   | { type: 'START_DISCUSSION' }
   | { type: 'START_VOTING' }
   | { type: 'CAST_VOTE'; payload: { voterId: number; targetId: number | null } }
   | { type: 'NEXT_VOTER' }
-  | { type: 'CALCULATE_RESULTS' }
+  | { type: 'PROCESS_VOTES' }
+  | { type: 'CONTINUE_GAME' }
+  | { type: 'END_GAME' }
   | { type: 'NEW_ROUND' }
   | { type: 'RESET_GAME' };
-
-// ============================================
-// HELPER: CREATE PLAYERS
-// ============================================
-
-const createPlayers = (
-  playerCount: number,
-  impostorCount: number,
-  secretWord: string,
-  playerNames: string[]
-): Player[] => {
-  // Create array of impostor indices
-  const impostorIndices = new Set<number>();
-  while (impostorIndices.size < impostorCount) {
-    impostorIndices.add(Math.floor(Math.random() * playerCount));
-  }
-
-  // Create players with custom names or default names
-  return Array.from({ length: playerCount }, (_, index) => {
-    const customName = playerNames[index]?.trim();
-    return {
-      id: index + 1,
-      displayName: customName || `Player ${index + 1}`,
-      isImpostor: impostorIndices.has(index),
-      secretWord: impostorIndices.has(index) ? '???' : secretWord,
-      hasSeenRole: false,
-      hasVoted: false,
-      votedFor: null,
-      isEliminated: false,
-      votesReceived: 0,
-    };
-  });
-};
 
 // ============================================
 // REDUCER
@@ -72,7 +51,6 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const newPlayerCount = action.payload;
       const maxImpostors = getMaxImpostors(newPlayerCount);
 
-      // Adjust player names array
       let newPlayerNames = [...state.settings.playerNames];
       if (newPlayerCount > newPlayerNames.length) {
         for (let i = newPlayerNames.length; i < newPlayerCount; i++) {
@@ -144,6 +122,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         state.settings.playerNames
       );
 
+      const playerOrder = createRandomPlayerOrder(state.settings.playerCount);
+
       return {
         ...state,
         phase: 'passing',
@@ -152,7 +132,10 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         currentPlayerIndex: 0,
         currentVoterIndex: 0,
         round: state.round + 1,
+        voteRound: 0,
+        lastVoteResult: null,
         gameResult: null,
+        playerOrder,
       };
     }
 
@@ -164,19 +147,28 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'PLAYER_SAW_ROLE': {
+      const actualPlayerIndex = state.playerOrder[state.currentPlayerIndex];
+
       const updatedPlayers = state.players.map((player, index) =>
-        index === state.currentPlayerIndex
+        index === actualPlayerIndex
           ? { ...player, hasSeenRole: true }
           : player
       );
 
+      return {
+        ...state,
+        players: updatedPlayers,
+        phase: 'hiding',
+      };
+    }
+
+    case 'HIDE_ROLE': {
       const nextIndex = state.currentPlayerIndex + 1;
       const allPlayersSawRole = nextIndex >= state.players.length;
 
       if (allPlayersSawRole) {
         return {
           ...state,
-          players: updatedPlayers,
           phase: 'discussion',
           currentPlayerIndex: 0,
         };
@@ -184,7 +176,6 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 
       return {
         ...state,
-        players: updatedPlayers,
         phase: 'passing',
         currentPlayerIndex: nextIndex,
       };
@@ -198,10 +189,14 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'START_VOTING': {
+      const resetPlayers = resetPlayersForVoting(state.players);
+
       return {
         ...state,
         phase: 'voting',
+        players: resetPlayers,
         currentVoterIndex: 0,
+        voteRound: state.voteRound + 1,
       };
     }
 
@@ -220,26 +215,78 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'NEXT_VOTER': {
-      const nextVoterIndex = state.currentVoterIndex + 1;
-      const allPlayersVoted = nextVoterIndex >= state.players.length;
+      const alivePlayers = getAlivePlayers(state.players);
+      const allVoted = alivePlayers.every(p => p.hasVoted);
 
-      if (allPlayersVoted) {
-        const gameResult = determineGameResult(state.players);
+      if (allVoted) {
+        const voteResult = processVoteRound(state.players);
+
+        const updatedPlayers = voteResult.eliminatedPlayer
+          ? state.players.map(p =>
+              p.id === voteResult.eliminatedPlayer!.id
+                ? { ...p, isEliminated: true }
+                : p
+            )
+          : state.players;
+
         return {
           ...state,
-          phase: 'results',
-          gameResult,
+          players: updatedPlayers,
+          phase: 'votingResults',
+          lastVoteResult: voteResult,
         };
       }
 
       return {
         ...state,
-        currentVoterIndex: nextVoterIndex,
+        currentVoterIndex: state.currentVoterIndex + 1,
       };
     }
 
-    case 'CALCULATE_RESULTS': {
-      const gameResult = determineGameResult(state.players);
+    case 'PROCESS_VOTES': {
+      const voteResult = processVoteRound(state.players);
+
+      const updatedPlayers = voteResult.eliminatedPlayer
+        ? state.players.map(p =>
+            p.id === voteResult.eliminatedPlayer!.id
+              ? { ...p, isEliminated: true }
+              : p
+          )
+        : state.players;
+
+      return {
+        ...state,
+        players: updatedPlayers,
+        phase: 'votingResults',
+        lastVoteResult: voteResult,
+      };
+    }
+
+    case 'CONTINUE_GAME': {
+      const resetPlayers = resetPlayersForVoting(state.players);
+
+      return {
+        ...state,
+        players: resetPlayers,
+        phase: 'discussion',
+        currentVoterIndex: 0,
+      };
+    }
+
+    case 'END_GAME': {
+      const survivingPlayers = state.players.filter(p => !p.isEliminated);
+      const eliminatedPlayers = state.players.filter(p => p.isEliminated);
+      const aliveImpostors = survivingPlayers.filter(p => p.isImpostor);
+
+      const gameResult: GameResult = {
+        crewmatesWin: aliveImpostors.length === 0,
+        impostorsWin: aliveImpostors.length > 0,
+        endReason: aliveImpostors.length === 0 ? 'impostor_eliminated' : 'impostor_majority',
+        allVoteRounds: state.lastVoteResult ? [state.lastVoteResult] : [],
+        survivingPlayers,
+        eliminatedPlayers,
+      };
+
       return {
         ...state,
         phase: 'results',
@@ -258,6 +305,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         state.settings.playerNames
       );
 
+      const playerOrder = createRandomPlayerOrder(state.settings.playerCount);
+
       return {
         ...state,
         phase: 'passing',
@@ -266,7 +315,10 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         currentPlayerIndex: 0,
         currentVoterIndex: 0,
         round: state.round + 1,
+        voteRound: 0,
+        lastVoteResult: null,
         gameResult: null,
+        playerOrder,
       };
     }
 
@@ -296,6 +348,9 @@ interface GameContextType {
   currentVoter: Player | null;
   impostors: Player[];
   crewmates: Player[];
+  alivePlayers: Player[];
+  aliveImpostors: Player[];
+  aliveCrewmates: Player[];
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -311,10 +366,17 @@ interface GameProviderProps {
 export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(gameReducer, INITIAL_GAME_STATE);
 
-  const currentPlayer = state.players[state.currentPlayerIndex] || null;
-  const currentVoter = state.players[state.currentVoterIndex] || null;
-  const impostors = state.players.filter((p) => p.isImpostor);
-  const crewmates = state.players.filter((p) => !p.isImpostor);
+  const actualPlayerIndex = state.playerOrder[state.currentPlayerIndex] ?? 0;
+  const currentPlayer = state.players[actualPlayerIndex] || null;
+
+  const alivePlayers = state.players.filter(p => !p.isEliminated);
+  const alivePlayersWhoNeedToVote = alivePlayers.filter(p => !p.hasVoted);
+  const currentVoter = alivePlayersWhoNeedToVote[0] || null;
+
+  const impostors = state.players.filter(p => p.isImpostor);
+  const crewmates = state.players.filter(p => !p.isImpostor);
+  const aliveImpostors = alivePlayers.filter(p => p.isImpostor);
+  const aliveCrewmates = alivePlayers.filter(p => !p.isImpostor);
 
   const value: GameContextType = {
     state,
@@ -323,6 +385,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     currentVoter,
     impostors,
     crewmates,
+    alivePlayers,
+    aliveImpostors,
+    aliveCrewmates,
   };
 
   return (

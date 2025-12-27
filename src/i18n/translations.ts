@@ -56,6 +56,7 @@ const en = {
     crewmateTip: 'Find the impostor by asking clever questions!',
     gotIt: 'GOT IT',
     memorizeHint: "Press when you've memorized your role",
+    hiding: 'HIDING...',
   },
 
   // Discussion Screen
@@ -84,8 +85,23 @@ const en = {
     skipVote: 'SKIP VOTE',
   },
 
+  // Voting Results Screen
+  votingResults: {
+    title: 'VOTE RESULTS',
+    eliminated: 'ELIMINATED',
+    noElimination: 'NO ONE ELIMINATED',
+    tieVote: 'The vote was a tie!',
+    wasImpostor: 'was an IMPOSTOR',
+    wasCrewmate: 'was a CREWMATE',
+    impostorsRemaining: '{{count}} impostor(s) remaining',
+    crewmatesRemaining: '{{count}} crewmate(s) remaining',
+    continueGame: 'CONTINUE',
+    gameOver: 'SEE FINAL RESULTS',
+  },
+
   // Results Screen
   results: {
+    title: 'GAME OVER',
     tie: "IT'S A TIE!",
     noElimination: 'No one was eliminated',
     crewmatesWin: 'CREWMATES WIN!',
@@ -102,6 +118,11 @@ const en = {
     playAgain: 'PLAY AGAIN',
     newSetup: 'NEW SETUP',
     homeButton: 'HOME',
+    allImpostorsEliminated: 'All impostors were eliminated!',
+    impostorsMajority: 'Impostors reached majority!',
+    eliminatedPlayers: 'ELIMINATED PLAYERS',
+    survivingPlayers: 'SURVIVING PLAYERS',
+    rounds: 'rounds',
   },
 
   // How to Play Modal
@@ -122,8 +143,8 @@ const en = {
     step2: 'Take turns describing the secret word',
     step3: 'Ask questions to find suspicious players',
     step4: 'Vote to eliminate the suspected impostor',
-    step5: 'Crewmates win if they eliminate the impostor',
-    step6: 'Impostor wins if they survive or guess the word',
+    step5: 'Crewmates win if they eliminate all impostors',
+    step6: 'Impostors win if they equal or outnumber crewmates',
     tipsTitle: 'TIPS',
     tip1: "Be vague enough that the impostor can't guess",
     tip2: 'But specific enough to prove you know the word',
@@ -202,6 +223,7 @@ const es = {
     crewmateTip: '¡Encuentra al impostor haciendo preguntas inteligentes!',
     gotIt: 'ENTENDIDO',
     memorizeHint: 'Presiona cuando hayas memorizado tu rol',
+    hiding: 'OCULTANDO...',
   },
 
   // Discussion Screen
@@ -230,12 +252,27 @@ const es = {
     skipVote: 'SALTAR VOTO',
   },
 
+  // Voting Results Screen
+  votingResults: {
+    title: 'RESULTADOS DE VOTACIÓN',
+    eliminated: 'ELIMINADO',
+    noElimination: 'NADIE FUE ELIMINADO',
+    tieVote: '¡La votación fue un empate!',
+    wasImpostor: 'era un IMPOSTOR',
+    wasCrewmate: 'era un TRIPULANTE',
+    impostorsRemaining: '{{count}} impostor(es) restante(s)',
+    crewmatesRemaining: '{{count}} tripulante(s) restante(s)',
+    continueGame: 'CONTINUAR',
+    gameOver: 'VER RESULTADOS FINALES',
+  },
+
   // Results Screen
   results: {
+    title: 'FIN DEL JUEGO',
     tie: '¡ES UN EMPATE!',
     noElimination: 'Nadie fue eliminado',
     crewmatesWin: '¡GANAN LOS TRIPULANTES!',
-    impostorsWin: '¡GANA EL IMPOSTOR!',
+    impostorsWin: '¡GANAN LOS IMPOSTORES!',
     eliminated: 'ELIMINADO',
     wasImpostor: 'ERA EL IMPOSTOR',
     wasCrewmate: 'ERA UN TRIPULANTE',
@@ -248,6 +285,11 @@ const es = {
     playAgain: 'JUGAR DE NUEVO',
     newSetup: 'NUEVA CONFIG.',
     homeButton: 'INICIO',
+    allImpostorsEliminated: '¡Todos los impostores fueron eliminados!',
+    impostorsMajority: '¡Los impostores alcanzaron la mayoría!',
+    eliminatedPlayers: 'JUGADORES ELIMINADOS',
+    survivingPlayers: 'JUGADORES SOBREVIVIENTES',
+    rounds: 'rondas',
   },
 
   // How to Play Modal
@@ -268,8 +310,8 @@ const es = {
     step2: 'Tomen turnos describiendo la palabra secreta',
     step3: 'Hagan preguntas para encontrar jugadores sospechosos',
     step4: 'Voten para eliminar al sospechoso de ser impostor',
-    step5: 'Los tripulantes ganan si eliminan al impostor',
-    step6: 'El impostor gana si sobrevive o adivina la palabra',
+    step5: 'Los tripulantes ganan si eliminan a todos los impostores',
+    step6: 'Los impostores ganan si igualan o superan a los tripulantes',
     tipsTitle: 'CONSEJOS',
     tip1: 'Sé lo suficientemente vago para que el impostor no adivine',
     tip2: 'Pero lo suficientemente específico para demostrar que conoces la palabra',

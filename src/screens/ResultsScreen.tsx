@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 import { ScreenContainer } from '../components/common/ScreenContainer';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
@@ -19,30 +19,62 @@ export const ResultsScreen: React.FC = () => {
   const { t } = useLanguage();
   const { gameResult } = state;
 
-  // Block Android back button
   useBlockBackButton(true);
 
   const handlePlayAgain = () => {
     dispatch({ type: 'NEW_ROUND' });
-    navigation.navigate('PassDevice');
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'PassDevice' }],
+      })
+    );
   };
 
   const handleNewGame = () => {
     dispatch({ type: 'RESET_GAME' });
-    navigation.navigate('Setup');
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'Setup' }],
+      })
+    );
   };
 
   const handleHome = () => {
     dispatch({ type: 'RESET_GAME' });
-    navigation.navigate('Home');
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      })
+    );
   };
 
+  // If no game result, show a fallback UI with navigation options
   if (!gameResult) {
-    return null;
+    return (
+      <ScreenContainer centered>
+        <View style={styles.noResultContainer}>
+          <Text style={styles.noResultText}>No game results available</Text>
+          <Button
+            title={t.results.homeButton}
+            onPress={handleHome}
+            size="lg"
+            style={styles.noResultButton}
+          />
+        </View>
+      </ScreenContainer>
+    );
   }
 
-  const { eliminatedPlayer, wasImpostor, crewmatesWin, isTie, voteSummary } =
-    gameResult;
+  const { crewmatesWin, eliminatedPlayers, survivingPlayers, allVoteRounds } = gameResult;
+
+  const lastVoteRound = allVoteRounds && allVoteRounds.length > 0
+    ? allVoteRounds[allVoteRounds.length - 1]
+    : null;
+
+  const voteSummary = lastVoteRound?.voteSummary || [];
 
   return (
     <ScreenContainer>
@@ -53,71 +85,36 @@ export const ResultsScreen: React.FC = () => {
       >
         {/* Result Header */}
         <View style={styles.header}>
-          {isTie ? (
-            <>
-              <Text style={styles.resultIcon}>⚖️</Text>
-              <Text style={styles.resultTitle}>{t.results.tie}</Text>
-              <Text style={styles.resultSubtitle}>{t.results.noElimination}</Text>
-            </>
-          ) : (
-            <>
-              <Text style={styles.resultIcon}>{wasImpostor ? '🎉' : '😈'}</Text>
-              <Text
-                style={[
-                  styles.resultTitle,
-                  crewmatesWin ? styles.resultTitleWin : styles.resultTitleLose,
-                ]}
-              >
-                {crewmatesWin ? t.results.crewmatesWin : t.results.impostorsWin}
-              </Text>
-            </>
-          )}
-        </View>
-
-        {/* Eliminated Player */}
-        {eliminatedPlayer && (
-          <Card
-            variant={wasImpostor ? 'highlighted' : 'danger'}
-            style={styles.eliminatedCard}
+          <Text style={styles.resultIcon}>{crewmatesWin ? '🎉' : '😈'}</Text>
+          <Text
+            style={[
+              styles.resultTitle,
+              crewmatesWin ? styles.resultTitleWin : styles.resultTitleLose,
+            ]}
           >
-            <Text style={styles.eliminatedLabel}>{t.results.eliminated}</Text>
-            <View style={styles.eliminatedPlayer}>
-              <PlayerAvatar
-                playerNumber={eliminatedPlayer.id}
-                size="lg"
-                variant={wasImpostor ? 'active' : 'eliminated'}
-              />
-              <View style={styles.eliminatedInfo}>
-                <Text style={styles.eliminatedName}>
-                  {eliminatedPlayer.displayName}
-                </Text>
-                <Text
-                  style={[
-                    styles.eliminatedRole,
-                    wasImpostor ? styles.roleImpostor : styles.roleCrewmate,
-                  ]}
-                >
-                  {wasImpostor
-                    ? `🎭 ${t.results.wasImpostor}`
-                    : `👤 ${t.results.wasCrewmate}`}
-                </Text>
-              </View>
-            </View>
-          </Card>
-        )}
+            {crewmatesWin ? t.results.crewmatesWin : t.results.impostorsWin}
+          </Text>
+          <Text style={styles.resultSubtitle}>
+            {crewmatesWin
+              ? t.results.allImpostorsEliminated
+              : t.results.impostorsMajority}
+          </Text>
+        </View>
 
         {/* Secret Word Reveal */}
         <Card style={styles.wordCard}>
           <Text style={styles.wordLabel}>{t.results.secretWordWas}</Text>
           <Text style={styles.secretWord}>{state.secretWord}</Text>
-          <View style={styles.categoryBadge}>
-            <Text style={styles.categoryIcon}>
-              {state.settings.selectedCategory?.icon}
-            </Text>
-            <Text style={styles.categoryName}>
-              {state.settings.selectedCategory?.name}
-            </Text>
-          </View>
+          {state.settings.selectedCategory && (
+            <View style={styles.categoryBadge}>
+              <Text style={styles.categoryIcon}>
+                {state.settings.selectedCategory.icon}
+              </Text>
+              <Text style={styles.categoryName}>
+                {state.settings.selectedCategory.name}
+              </Text>
+            </View>
+          )}
         </Card>
 
         {/* Impostor Reveal */}
@@ -139,26 +136,82 @@ export const ResultsScreen: React.FC = () => {
           </View>
         </Card>
 
-        {/* Vote Summary */}
-        <Card style={styles.voteSummaryCard}>
-          <Text style={styles.voteSummaryLabel}>{t.results.voteSummary}</Text>
-          {voteSummary
-            .sort((a, b) => b.votesReceived - a.votesReceived)
-            .map((vote) => (
-              <View key={vote.playerId} style={styles.voteRow}>
-                <View style={styles.votePlayer}>
-                  <PlayerAvatar playerNumber={vote.playerId} size="sm" />
-                  <Text style={styles.votePlayerName}>{vote.playerName}</Text>
-                </View>
-                <View style={styles.voteCount}>
-                  <Text style={styles.voteCountText}>
-                    {vote.votesReceived}{' '}
-                    {vote.votesReceived === 1 ? t.results.vote : t.results.votes}
+        {/* Eliminated Players */}
+        {eliminatedPlayers && eliminatedPlayers.length > 0 && (
+          <Card style={styles.playersCard}>
+            <Text style={styles.playersLabel}>{t.results.eliminatedPlayers}</Text>
+            <View style={styles.playersList}>
+              {eliminatedPlayers.map((player) => (
+                <View key={player.id} style={styles.playerItem}>
+                  <PlayerAvatar
+                    playerNumber={player.id}
+                    size="sm"
+                    variant="eliminated"
+                  />
+                  <Text style={styles.playerName}>{player.displayName}</Text>
+                  <Text
+                    style={[
+                      styles.playerRole,
+                      player.isImpostor ? styles.roleImpostor : styles.roleCrewmate,
+                    ]}
+                  >
+                    {player.isImpostor ? '🎭' : '👤'}
                   </Text>
                 </View>
-              </View>
-            ))}
-        </Card>
+              ))}
+            </View>
+          </Card>
+        )}
+
+        {/* Surviving Players */}
+        {survivingPlayers && survivingPlayers.length > 0 && (
+          <Card style={styles.playersCard}>
+            <Text style={styles.playersLabel}>{t.results.survivingPlayers}</Text>
+            <View style={styles.playersList}>
+              {survivingPlayers.map((player) => (
+                <View key={player.id} style={styles.playerItem}>
+                  <PlayerAvatar
+                    playerNumber={player.id}
+                    size="sm"
+                    variant={player.isImpostor ? 'eliminated' : 'active'}
+                  />
+                  <Text style={styles.playerName}>{player.displayName}</Text>
+                  <Text
+                    style={[
+                      styles.playerRole,
+                      player.isImpostor ? styles.roleImpostor : styles.roleCrewmate,
+                    ]}
+                  >
+                    {player.isImpostor ? '🎭' : '👤'}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </Card>
+        )}
+
+        {/* Vote Summary from last round */}
+        {voteSummary.length > 0 && (
+          <Card style={styles.voteSummaryCard}>
+            <Text style={styles.voteSummaryLabel}>{t.results.voteSummary}</Text>
+            {[...voteSummary]
+              .sort((a, b) => b.votesReceived - a.votesReceived)
+              .map((vote) => (
+                <View key={vote.playerId} style={styles.voteRow}>
+                  <View style={styles.votePlayer}>
+                    <PlayerAvatar playerNumber={vote.playerId} size="sm" />
+                    <Text style={styles.votePlayerName}>{vote.playerName}</Text>
+                  </View>
+                  <View style={styles.voteCount}>
+                    <Text style={styles.voteCountText}>
+                      {vote.votesReceived}{' '}
+                      {vote.votesReceived === 1 ? t.results.vote : t.results.votes}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+          </Card>
+        )}
       </ScrollView>
 
       {/* Actions */}
@@ -198,6 +251,19 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingBottom: spacing.xl,
   },
+  noResultContainer: {
+    alignItems: 'center',
+    padding: spacing.xl,
+  },
+  noResultText: {
+    fontFamily: typography.fonts.mono,
+    fontSize: typography.sizes.md,
+    color: colors.textSecondary,
+    marginBottom: spacing.lg,
+  },
+  noResultButton: {
+    minWidth: 200,
+  },
   header: {
     alignItems: 'center',
     marginBottom: spacing.xl,
@@ -223,40 +289,7 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     color: colors.textSecondary,
     marginTop: spacing.sm,
-  },
-  eliminatedCard: {
-    marginBottom: spacing.md,
-  },
-  eliminatedLabel: {
-    fontFamily: typography.fonts.mono,
-    fontSize: typography.sizes.xs,
-    color: colors.textSecondary,
-    letterSpacing: 2,
-    marginBottom: spacing.md,
-  },
-  eliminatedPlayer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  eliminatedInfo: {
-    marginLeft: spacing.md,
-    flex: 1,
-  },
-  eliminatedName: {
-    fontFamily: typography.fonts.monoBold,
-    fontSize: typography.sizes.lg,
-    color: colors.text,
-  },
-  eliminatedRole: {
-    fontFamily: typography.fonts.mono,
-    fontSize: typography.sizes.sm,
-    marginTop: spacing.xs,
-  },
-  roleImpostor: {
-    color: colors.danger,
-  },
-  roleCrewmate: {
-    color: colors.primary,
+    textAlign: 'center',
   },
   wordCard: {
     alignItems: 'center',
@@ -314,6 +347,39 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.md,
     color: colors.danger,
     marginLeft: spacing.md,
+  },
+  playersCard: {
+    marginBottom: spacing.md,
+  },
+  playersLabel: {
+    fontFamily: typography.fonts.mono,
+    fontSize: typography.sizes.xs,
+    color: colors.textSecondary,
+    letterSpacing: 2,
+    marginBottom: spacing.md,
+  },
+  playersList: {
+    gap: spacing.sm,
+  },
+  playerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  playerName: {
+    fontFamily: typography.fonts.mono,
+    fontSize: typography.sizes.sm,
+    color: colors.text,
+    marginLeft: spacing.sm,
+    flex: 1,
+  },
+  playerRole: {
+    fontSize: 16,
+  },
+  roleImpostor: {
+    color: colors.danger,
+  },
+  roleCrewmate: {
+    color: colors.primary,
   },
   voteSummaryCard: {
     marginBottom: spacing.md,

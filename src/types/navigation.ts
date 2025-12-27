@@ -8,6 +8,7 @@ export type RootStackParamList = {
   RoleReveal: undefined;
   Discussion: undefined;
   Voting: undefined;
+  VotingResults: undefined;
   Results: undefined;
 };
 

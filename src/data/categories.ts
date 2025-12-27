@@ -90,6 +90,20 @@ export const defaultCategories: Category[] = [
       'Trombone', 'Banjo', 'Organ', 'Synthesizer', 'Tambourine', 'Xylophone',
     ],
   },
+  {
+    id: 'colombianBrands',
+    name: 'Colombian things',
+    icon: '🙈',
+    words: [
+      'Chocorramo', 'Alpina', 'Juan Valdez', 'Colanta', 'Postobon', 'Aguila',
+      'Coca-Cola', 'Doria','Arequipe',
+      'Jet', 'Colo"mbina', 'Nucal', 'Cerveza poker', 'Ramo', 'Nescafé', 'Cerveza andina',
+      'Color Royal "especia"', 'Papel Familia', 'Bimbo', 'Arturo Calle', 'Studio F', 'Éxito',
+      'Carrefour', 'Homecenter', 'Sofasa', 'Renault', 'Parmalat', 'Lechesan',
+      'Choclitos', 'Chiclets Adams', 'Bom Bom Bun','Trident', 'Halls'
+      , 'Gelatina de pata', 'Barrilete', 'Arequipe alpina'
+    ],
+  },
 ];
 
 export const getRandomWord = (category: Category): string => {

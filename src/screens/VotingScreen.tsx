@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ScreenContainer } from '../components/common/ScreenContainer';
@@ -16,12 +16,29 @@ import { ScreenNavigationProp } from '../types/navigation';
 
 export const VotingScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
-  const { state, dispatch, currentVoter } = useGame();
+  const { state, dispatch, currentVoter, alivePlayers } = useGame();
   const { t } = useLanguage();
   const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null);
 
-  // Block Android back button
   useBlockBackButton(true);
+
+  // Handle navigation when all votes are cast
+  useEffect(() => {
+    const allVoted = alivePlayers.every(p => p.hasVoted);
+    if (allVoted && alivePlayers.length > 0) {
+      navigation.navigate('VotingResults');
+    }
+  }, [alivePlayers, navigation]);
+
+  // Handle case when there's no current voter
+  useEffect(() => {
+    if (!currentVoter && alivePlayers.length > 0) {
+      const allVoted = alivePlayers.every(p => p.hasVoted);
+      if (allVoted) {
+        navigation.navigate('VotingResults');
+      }
+    }
+  }, [currentVoter, alivePlayers, navigation]);
 
   const handleVote = (playerId: number) => {
     setSelectedPlayerId(playerId);
@@ -40,11 +57,6 @@ export const VotingScreen: React.FC = () => {
 
     setSelectedPlayerId(null);
     dispatch({ type: 'NEXT_VOTER' });
-
-    const nextVoterIndex = state.currentVoterIndex + 1;
-    if (nextVoterIndex >= state.players.length) {
-      navigation.navigate('Results');
-    }
   };
 
   const handleSkipVote = () => {
@@ -60,24 +72,30 @@ export const VotingScreen: React.FC = () => {
 
     setSelectedPlayerId(null);
     dispatch({ type: 'NEXT_VOTER' });
-
-    const nextVoterIndex = state.currentVoterIndex + 1;
-    if (nextVoterIndex >= state.players.length) {
-      navigation.navigate('Results');
-    }
   };
 
+  // Show loading or nothing while waiting for navigation
   if (!currentVoter) {
-    return null;
+    return (
+      <ScreenContainer centered>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </ScreenContainer>
+    );
   }
 
-  const votablePlayers = state.players.filter(
+  // Only show alive players that the current voter can vote for
+  const votablePlayers = alivePlayers.filter(
     (player) => player.id !== currentVoter.id
   );
 
+  // Count voters
+  const alivePlayersWhoVoted = alivePlayers.filter(p => p.hasVoted);
+  const currentVoterNumber = alivePlayersWhoVoted.length + 1;
+  const totalVoters = alivePlayers.length;
+
   const voterOfText = t.voting.voterOf
-    .replace('{{current}}', String(state.currentVoterIndex + 1))
-    .replace('{{total}}', String(state.players.length));
+    .replace('{{current}}', String(currentVoterNumber))
+    .replace('{{total}}', String(totalVoters));
 
   return (
     <ScreenContainer>
@@ -86,6 +104,11 @@ export const VotingScreen: React.FC = () => {
         <View style={styles.header}>
           <Text style={styles.phase}>{t.voting.title}</Text>
           <Text style={styles.voterCount}>{voterOfText}</Text>
+          {state.voteRound > 1 && (
+            <Text style={styles.roundInfo}>
+              {t.discussion.round.replace('{{number}}', String(state.voteRound))}
+            </Text>
+          )}
         </View>
 
         {/* Current Voter */}
@@ -151,6 +174,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: spacing.md,
   },
+  loadingText: {
+    fontFamily: typography.fonts.mono,
+    fontSize: typography.sizes.md,
+    color: colors.textSecondary,
+  },
   header: {
     alignItems: 'center',
     marginBottom: spacing.lg,
@@ -166,6 +194,12 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     color: colors.textSecondary,
     marginTop: spacing.xs,
+  },
+  roundInfo: {
+    fontFamily: typography.fonts.mono,
+    fontSize: typography.sizes.xs,
+    color: colors.textMuted,
+    marginTop: spacing.xxs,
   },
   voterCard: {
     flexDirection: 'row',

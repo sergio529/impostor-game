@@ -22,13 +22,15 @@ export const HomeScreen: React.FC = () => {
         {/* Logo Section */}
         <View style={styles.logoSection}>
           <Text style={styles.logoIcon}>👁️</Text>
-          <Text style={styles.title}>{t.home.title}</Text>
+          <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit>
+            {t.home.title}
+          </Text>
           <Text style={styles.subtitle}>{t.home.subtitle}</Text>
         </View>
 
         {/* Decorative Line */}
         <View style={styles.divider}>
-          <Text style={styles.dividerText}>══════════════════════</Text>
+          <Text style={styles.dividerText}>══════════════════</Text>
         </View>
 
         {/* Actions */}
@@ -77,14 +79,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   logoIcon: {
-    fontSize: 72,
+    fontSize: 64,
     marginBottom: spacing.md,
   },
   title: {
     fontFamily: typography.fonts.monoBold,
     fontSize: typography.sizes.huge,
     color: colors.primary,
-    letterSpacing: 6,
+    letterSpacing: 4,
+    textAlign: 'center',
+    width: '100%',
   },
   subtitle: {
     fontFamily: typography.fonts.mono,

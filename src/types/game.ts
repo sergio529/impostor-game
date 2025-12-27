@@ -59,9 +59,45 @@ export type GamePhase =
   | 'setup'
   | 'passing'
   | 'revealing'
+  | 'hiding'        // NEW: Transition phase to hide role
   | 'discussion'
   | 'voting'
-  | 'results';
+  | 'votingResults' // NEW: Show who was eliminated
+  | 'results';      // Final game results
+
+// ============================================
+// GAME RESULT TYPES
+// ============================================
+
+export type GameEndReason =
+  | 'impostor_eliminated'    // All impostors eliminated
+  | 'impostor_majority'      // Impostors >= Crewmates
+  | 'tie_vote';              // Tie in final round
+
+export interface VoteRoundResult {
+  eliminatedPlayer: Player | null;
+  wasImpostor: boolean;
+  isTie: boolean;
+  voteSummary: VoteSummary[];
+  gameEnded: boolean;
+  endReason: GameEndReason | null;
+}
+
+export interface GameResult {
+  crewmatesWin: boolean;
+  impostorsWin: boolean;
+  endReason: GameEndReason;
+  allVoteRounds: VoteRoundResult[];
+  survivingPlayers: Player[];
+  eliminatedPlayers: Player[];
+}
+
+export interface VoteSummary {
+  playerId: number;
+  playerName: string;
+  votesReceived: number;
+  votedFor: number | null;
+}
 
 // ============================================
 // GAME STATE
@@ -75,23 +111,10 @@ export interface GameState {
   secretWord: string;
   settings: GameSettings;
   round: number;
+  voteRound: number;
+  lastVoteResult: VoteRoundResult | null;
   gameResult: GameResult | null;
-}
-
-export interface GameResult {
-  eliminatedPlayer: Player | null;
-  wasImpostor: boolean;
-  crewmatesWin: boolean;
-  impostorsWin: boolean;
-  isTie: boolean;
-  voteSummary: VoteSummary[];
-}
-
-export interface VoteSummary {
-  playerId: number;
-  playerName: string;
-  votesReceived: number;
-  votedFor: number | null;
+  playerOrder: number[]; // NEW: Randomized order for role reveal
 }
 
 // ============================================
@@ -106,5 +129,8 @@ export const INITIAL_GAME_STATE: GameState = {
   secretWord: '',
   settings: DEFAULT_SETTINGS,
   round: 0,
+  voteRound: 0,
+  lastVoteResult: null,
   gameResult: null,
+  playerOrder: [],
 };

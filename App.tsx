@@ -22,7 +22,6 @@ import { LanguageProvider } from './src/i18n';
 import { colors } from './src/theme/colors';
 import { RootStackParamList } from './src/types/navigation';
 
-// Screens
 import { HomeScreen } from './src/screens/HomeScreen';
 import { SetupScreen } from './src/screens/SetupScreen';
 import { PlayerNamesScreen } from './src/screens/PlayerNamesScreen';
@@ -30,15 +29,13 @@ import { PassDeviceScreen } from './src/screens/PassDeviceScreen';
 import { RoleRevealScreen } from './src/screens/RoleRevealScreen';
 import { DiscussionScreen } from './src/screens/DiscussionScreen';
 import { VotingScreen } from './src/screens/VotingScreen';
+import { VotingResultsScreen } from './src/screens/VotingResultsScreen';
 import { ResultsScreen } from './src/screens/ResultsScreen';
 
-// Keep splash screen visible while loading
 SplashScreen.preventAutoHideAsync();
 
-// Create navigation stack
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-// Custom dark theme for navigation
 const DarkTheme = {
   ...DefaultTheme,
   dark: true,
@@ -73,7 +70,6 @@ export default function App() {
         setAppIsReady(true);
       }
     }
-
     prepare();
   }, []);
 
@@ -102,12 +98,9 @@ export default function App() {
                   contentStyle: { backgroundColor: colors.background },
                 }}
               >
-                {/* Screens where back is allowed */}
                 <Stack.Screen name="Home" component={HomeScreen} />
                 <Stack.Screen name="Setup" component={SetupScreen} />
                 <Stack.Screen name="PlayerNames" component={PlayerNamesScreen} />
-
-                {/* Game screens - gesture back disabled */}
                 <Stack.Screen
                   name="PassDevice"
                   component={PassDeviceScreen}
@@ -126,6 +119,11 @@ export default function App() {
                 <Stack.Screen
                   name="Voting"
                   component={VotingScreen}
+                  options={{ gestureEnabled: false }}
+                />
+                <Stack.Screen
+                  name="VotingResults"
+                  component={VotingResultsScreen}
                   options={{ gestureEnabled: false }}
                 />
                 <Stack.Screen
