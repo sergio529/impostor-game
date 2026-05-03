@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { Modal } from '../common/Modal';
 import { Button } from '../common/Button';
 import { useLanguage } from '../../i18n';
@@ -20,84 +20,97 @@ export const HowToPlayModal: React.FC<HowToPlayModalProps> = ({
 
   return (
     <Modal visible={visible} onClose={onClose}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{t.howToPlay.title}</Text>
-      </View>
-
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Objective */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t.howToPlay.objective}</Text>
-          <Text style={styles.sectionText}>{t.howToPlay.objectiveText}</Text>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>{t.howToPlay.title}</Text>
         </View>
 
-        {/* Roles */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t.howToPlay.rolesTitle}</Text>
-
-          <View style={styles.roleCard}>
-            <Text style={styles.roleIcon}>👤</Text>
-            <View style={styles.roleInfo}>
-              <Text style={styles.roleName}>{t.howToPlay.crewmateRole}</Text>
-              <Text style={styles.roleDesc}>{t.howToPlay.crewmateDesc}</Text>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          nestedScrollEnabled={false}
+          alwaysBounceVertical
+        >
+          <View style={styles.innerContent}>
+            {/* Objective */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t.howToPlay.objective}</Text>
+              <Text style={styles.sectionText}>{t.howToPlay.objectiveText}</Text>
             </View>
-          </View>
 
-          <View style={[styles.roleCard, styles.roleCardDanger]}>
-            <Text style={styles.roleIcon}>🎭</Text>
-            <View style={styles.roleInfo}>
-              <Text style={[styles.roleName, styles.roleNameDanger]}>
-                {t.howToPlay.impostorRole}
-              </Text>
-              <Text style={styles.roleDesc}>{t.howToPlay.impostorDesc}</Text>
-            </View>
-          </View>
-        </View>
+            {/* Roles */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t.howToPlay.rolesTitle}</Text>
 
-        {/* Gameplay */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t.howToPlay.gameplayTitle}</Text>
-          {[
-            t.howToPlay.step1,
-            t.howToPlay.step2,
-            t.howToPlay.step3,
-            t.howToPlay.step4,
-            t.howToPlay.step5,
-            t.howToPlay.step6,
-          ].map((step, index) => (
-            <View key={index} style={styles.stepRow}>
-              <Text style={styles.stepNumber}>{index + 1}</Text>
-              <Text style={styles.stepText}>{step}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Tips */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t.howToPlay.tipsTitle}</Text>
-          {[t.howToPlay.tip1, t.howToPlay.tip2, t.howToPlay.tip3].map(
-            (tip, index) => (
-              <View key={index} style={styles.tipRow}>
-                <Text style={styles.tipIcon}>💡</Text>
-                <Text style={styles.tipText}>{tip}</Text>
+              <View style={styles.roleCard}>
+                <Text style={styles.roleIcon}>👤</Text>
+                <View style={styles.roleInfo}>
+                  <Text style={styles.roleName}>{t.howToPlay.crewmateRole}</Text>
+                  <Text style={styles.roleDesc}>{t.howToPlay.crewmateDesc}</Text>
+                </View>
               </View>
-            )
-          )}
-        </View>
-      </ScrollView>
 
-      <View style={styles.footer}>
-        <Button title={t.howToPlay.gotIt} onPress={onClose} fullWidth />
+              <View style={[styles.roleCard, styles.roleCardDanger]}>
+                <Text style={styles.roleIcon}>🎭</Text>
+                <View style={styles.roleInfo}>
+                  <Text style={[styles.roleName, styles.roleNameDanger]}>
+                    {t.howToPlay.impostorRole}
+                  </Text>
+                  <Text style={styles.roleDesc}>{t.howToPlay.impostorDesc}</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Gameplay */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t.howToPlay.gameplayTitle}</Text>
+              {[
+                t.howToPlay.step1,
+                t.howToPlay.step2,
+                t.howToPlay.step3,
+                t.howToPlay.step4,
+                t.howToPlay.step5,
+                t.howToPlay.step6,
+              ].map((step, index) => (
+                <View key={index} style={styles.stepRow}>
+                  <Text style={styles.stepNumber}>{index + 1}</Text>
+                  <Text style={styles.stepText}>{step}</Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Tips */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t.howToPlay.tipsTitle}</Text>
+              {[t.howToPlay.tip1, t.howToPlay.tip2, t.howToPlay.tip3].map(
+                (tip, index) => (
+                  <View key={index} style={styles.tipRow}>
+                    <Text style={styles.tipIcon}>💡</Text>
+                    <Text style={styles.tipText}>{tip}</Text>
+                  </View>
+                )
+              )}
+            </View>
+          </View>
+        </ScrollView>
+
+        <View style={styles.footer}>
+          <Button title={t.howToPlay.gotIt} onPress={onClose} fullWidth />
+        </View>
       </View>
     </Modal>
   );
 };
 
+const modalHeight = Dimensions.get('window').height * 0.75;
+
 const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    height: modalHeight,
+    flexDirection: 'column',
+  },
   header: {
     padding: spacing.lg,
     borderBottomWidth: 1,
@@ -111,10 +124,14 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   scroll: {
-    maxHeight: 400,
+    flex: 1,
   },
   scrollContent: {
+    flexGrow: 1,
     padding: spacing.lg,
+  },
+  innerContent: {
+    flex: 1,
   },
   section: {
     marginBottom: spacing.lg,

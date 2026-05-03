@@ -23,6 +23,11 @@ export const DiscussionScreen: React.FC = () => {
   // Block Android back button
   useBlockBackButton(true);
 
+  // Get translated category name with fallback to default name
+  const translatedCategoryName = settings.selectedCategory
+    ? (t.categories[settings.selectedCategory.id as keyof typeof t.categories] ?? settings.selectedCategory.name)
+    : '';
+
   const hasTimer = settings.discussionTime > 0;
 
   const { timeLeft, isRunning, isComplete, start, formatTime } = useCountdown({
@@ -94,7 +99,7 @@ export const DiscussionScreen: React.FC = () => {
               {settings.selectedCategory?.icon}
             </Text>
             <Text style={styles.categoryName}>
-              {settings.selectedCategory?.name}
+              {translatedCategoryName}
             </Text>
           </View>
         </Card>

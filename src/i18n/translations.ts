@@ -162,6 +162,8 @@ const en = {
     professions: 'Jobs',
     technology: 'Tech',
     music: 'Music',
+    colombianBrands: 'Colombian things',
+    bible: 'Bible',
   },
 };
 
@@ -329,6 +331,8 @@ const es = {
     professions: 'Trabajos',
     technology: 'Tecnología',
     music: 'Música',
+    colombianBrands: 'Cosas colombianas',
+    bible: 'Biblia',
   },
 };
 

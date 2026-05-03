@@ -3,11 +3,13 @@ import {
   GameState,
   Player,
   Category,
+  CategoryWithTranslations,
   VoteRoundResult,
   GameResult,
   INITIAL_GAME_STATE,
 } from '../types/game';
 import { getRandomWord } from '../data/categories';
+import { Language } from '../i18n/translations';
 import {
   createPlayers,
   createRandomPlayerOrder,
@@ -27,7 +29,7 @@ type GameAction =
   | { type: 'SET_CATEGORY'; payload: Category }
   | { type: 'SET_DISCUSSION_TIME'; payload: number }
   | { type: 'SET_PLAYER_NAMES'; payload: string[] }
-  | { type: 'START_GAME' }
+  | { type: 'START_GAME'; payload: { language: Language } }
   | { type: 'PLAYER_READY' }
   | { type: 'PLAYER_SAW_ROLE' }
   | { type: 'HIDE_ROLE' }
@@ -38,7 +40,7 @@ type GameAction =
   | { type: 'PROCESS_VOTES' }
   | { type: 'CONTINUE_GAME' }
   | { type: 'END_GAME' }
-  | { type: 'NEW_ROUND' }
+  | { type: 'NEW_ROUND'; payload: { language: Language } }
   | { type: 'RESET_GAME' };
 
 // ============================================
@@ -114,7 +116,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     case 'START_GAME': {
       if (!state.settings.selectedCategory) return state;
 
-      const secretWord = getRandomWord(state.settings.selectedCategory);
+      // Cast to CategoryWithTranslations to access Spanish word lists
+      const category = state.settings.selectedCategory as CategoryWithTranslations;
+      const secretWord = getRandomWord(category, action.payload.language);
       const players = createPlayers(
         state.settings.playerCount,
         state.settings.impostorCount,
@@ -297,7 +301,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     case 'NEW_ROUND': {
       if (!state.settings.selectedCategory) return state;
 
-      const secretWord = getRandomWord(state.settings.selectedCategory);
+      // Cast to CategoryWithTranslations to access Spanish word lists
+      const category = state.settings.selectedCategory as CategoryWithTranslations;
+      const secretWord = getRandomWord(category, action.payload.language);
       const players = createPlayers(
         state.settings.playerCount,
         state.settings.impostorCount,

@@ -18,7 +18,7 @@ import { ScreenNavigationProp } from '../types/navigation';
 export const SetupScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const { state, dispatch } = useGame();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { settings } = state;
 
   const maxImpostors = getMaxImpostors(settings.playerCount);
@@ -26,6 +26,8 @@ export const SetupScreen: React.FC = () => {
 
   const handleContinue = () => {
     if (canContinue) {
+      // Pass the current language so the game generates words in the correct language
+      dispatch({ type: 'START_GAME', payload: { language } });
       navigation.navigate('PlayerNames');
     }
   };
@@ -38,10 +40,16 @@ export const SetupScreen: React.FC = () => {
     <ScreenContainer>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>← {t.back}</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t.setup.title}</Text>
+        {navigation.canGoBack() ? (
+          <>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Text style={styles.backButton}>← {t.back}</Text>
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>{t.setup.title}</Text>
+          </>
+        ) : (
+          <Text style={styles.headerTitleStandalone}>{t.setup.title}</Text>
+        )}
       </View>
 
       <ScrollView
@@ -112,7 +120,7 @@ export const SetupScreen: React.FC = () => {
                 {settings.selectedCategory.icon}
               </Text>
               <Text style={styles.selectedName}>
-                {settings.selectedCategory.name}
+                {t.categories[settings.selectedCategory.id as keyof typeof t.categories] ?? settings.selectedCategory.name}
               </Text>
             </View>
           </Card>
@@ -152,6 +160,13 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.lg,
     color: colors.text,
     marginLeft: spacing.md,
+  },
+  headerTitleStandalone: {
+    fontFamily: typography.fonts.monoBold,
+    fontSize: typography.sizes.lg,
+    color: colors.text,
+    textAlign: 'center',
+    flex: 1,
   },
   scroll: {
     flex: 1,

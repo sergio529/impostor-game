@@ -16,23 +16,18 @@ import { ScreenNavigationProp } from '../types/navigation';
 export const ResultsScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const { state, dispatch, impostors } = useGame();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { gameResult } = state;
+
+  // Get translated category name with fallback to default name
+  const translatedCategoryName = state.settings.selectedCategory
+    ? (t.categories[state.settings.selectedCategory.id as keyof typeof t.categories] ?? state.settings.selectedCategory.name)
+    : '';
 
   useBlockBackButton(true);
 
   const handlePlayAgain = () => {
-    dispatch({ type: 'NEW_ROUND' });
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: 'PassDevice' }],
-      })
-    );
-  };
-
-  const handleNewGame = () => {
-    dispatch({ type: 'RESET_GAME' });
+    // Go to Setup without resetting — player names and settings are preserved
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
@@ -111,7 +106,7 @@ export const ResultsScreen: React.FC = () => {
                 {state.settings.selectedCategory.icon}
               </Text>
               <Text style={styles.categoryName}>
-                {state.settings.selectedCategory.name}
+                {translatedCategoryName}
               </Text>
             </View>
           )}
@@ -223,13 +218,6 @@ export const ResultsScreen: React.FC = () => {
           fullWidth
         />
         <View style={styles.footerRow}>
-          <Button
-            title={t.results.newSetup}
-            onPress={handleNewGame}
-            variant="secondary"
-            size="md"
-            style={styles.footerButton}
-          />
           <Button
             title={t.results.homeButton}
             onPress={handleHome}

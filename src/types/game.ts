@@ -10,6 +10,14 @@ export interface Category {
   isCustom?: boolean;
 }
 
+/**
+ * Extended category type that includes Spanish word translations.
+ * Used by the data layer to serve language-appropriate words.
+ */
+export interface CategoryWithTranslations extends Category {
+  wordsEs: string[];
+}
+
 // ============================================
 // PLAYER TYPES
 // ============================================

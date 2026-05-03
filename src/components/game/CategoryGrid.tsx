@@ -5,6 +5,7 @@ import { Category } from '../../types/game';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme/spacing';
+import { useLanguage } from '../../i18n';
 
 interface CategoryGridProps {
   categories: Category[];
@@ -17,6 +18,17 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
   selectedCategory,
   onSelectCategory,
 }) => {
+  const { t } = useLanguage();
+
+  /**
+   * Helper to get the translated category name.
+   * Falls back to the category's default name if translation key is missing.
+   */
+  const getCategoryName = (category: Category): string => {
+    const categoryKey = category.id as keyof typeof t.categories;
+    return t.categories[categoryKey] ?? category.name;
+  };
+
   const handleSelect = async (category: Category) => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onSelectCategory(category);
@@ -24,7 +36,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>SELECT CATEGORY</Text>
+      <Text style={styles.title}>{t.setup.selectCategory}</Text>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -32,6 +44,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
       >
         {categories.map((category) => {
           const isSelected = selectedCategory?.id === category.id;
+          const wordCountLabel = `${category.words.length} ${t.setup.words}`;
           return (
             <TouchableOpacity
               key={category.id}
@@ -49,10 +62,10 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
                   isSelected && styles.categoryNameSelected,
                 ]}
               >
-                {category.name}
+                {getCategoryName(category)}
               </Text>
               <Text style={styles.wordCount}>
-                {category.words.length} words
+                {wordCountLabel}
               </Text>
             </TouchableOpacity>
           );

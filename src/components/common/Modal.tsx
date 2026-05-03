@@ -4,8 +4,6 @@ import {
   View,
   StyleSheet,
   TouchableWithoutFeedback,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { colors } from '../../theme/colors';
 import { spacing, borderRadius } from '../../theme/spacing';
@@ -25,18 +23,12 @@ export const Modal: React.FC<ModalProps> = ({ visible, onClose, children }) => {
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.overlay}>
-          <TouchableWithoutFeedback onPress={() => {}}>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-              style={styles.keyboardView}
-            >
-              <View style={styles.content}>{children}</View>
-            </KeyboardAvoidingView>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
+      <View style={styles.overlay}>
+        <TouchableWithoutFeedback onPress={onClose}>
+          <View style={StyleSheet.absoluteFill} />
+        </TouchableWithoutFeedback>
+        <View style={styles.content}>{children}</View>
+      </View>
     </RNModal>
   );
 };
@@ -49,11 +41,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: spacing.lg,
   },
-  keyboardView: {
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   content: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
@@ -61,6 +48,5 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     width: '100%',
     maxHeight: '85%',
-    overflow: 'hidden',
   },
 });

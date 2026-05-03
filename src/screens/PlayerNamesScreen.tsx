@@ -22,7 +22,7 @@ import { ScreenNavigationProp } from '../types/navigation';
 export const PlayerNamesScreen: React.FC = () => {
   const navigation = useNavigation<ScreenNavigationProp>();
   const { state, dispatch } = useGame();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { settings } = state;
 
   const [names, setNames] = useState<string[]>(() => {
@@ -53,7 +53,8 @@ export const PlayerNamesScreen: React.FC = () => {
 
   const handleContinue = () => {
     dispatch({ type: 'SET_PLAYER_NAMES', payload: names });
-    dispatch({ type: 'START_GAME' });
+    // Pass the current language so the game generates words in the correct language
+    dispatch({ type: 'START_GAME', payload: { language } });
     navigation.navigate('PassDevice');
   };
 
