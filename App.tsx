@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -32,7 +32,10 @@ import { VotingScreen } from './src/screens/VotingScreen';
 import { VotingResultsScreen } from './src/screens/VotingResultsScreen';
 import { ResultsScreen } from './src/screens/ResultsScreen';
 
-SplashScreen.preventAutoHideAsync();
+// SplashScreen is native-only — skip on web
+if (Platform.OS !== 'web') {
+  SplashScreen.preventAutoHideAsync();
+}
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -74,7 +77,8 @@ export default function App() {
   }, []);
 
   const onLayoutRootView = useCallback(async () => {
-    if (appIsReady) {
+    // SplashScreen is native-only — skip on web
+    if (appIsReady && Platform.OS !== 'web') {
       await SplashScreen.hideAsync();
     }
   }, [appIsReady]);

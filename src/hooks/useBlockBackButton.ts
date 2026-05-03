@@ -1,8 +1,17 @@
 import { useCallback } from 'react';
-import { BackHandler } from 'react-native';
+import { BackHandler, Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
+/**
+ * Blocks the Android hardware back button when active.
+ * No-op on web (no hardware back button).
+ */
 export const useBlockBackButton = (shouldBlock: boolean = true): void => {
+  // No-op on web — no hardware back button
+  if (Platform.OS === 'web') {
+    return;
+  }
+
   useFocusEffect(
     useCallback(() => {
       if (!shouldBlock) {

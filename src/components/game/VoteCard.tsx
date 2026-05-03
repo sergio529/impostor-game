@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { triggerHaptic } from '../../utils/haptics';
 import { Player } from '../../types/game';
 import { PlayerAvatar } from './PlayerAvatar';
 import { colors } from '../../theme/colors';
@@ -22,7 +22,7 @@ export const VoteCard: React.FC<VoteCardProps> = ({
 }) => {
   const handlePress = async () => {
     if (!disabled) {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      await triggerHaptic();
       onVote(player.id);
     }
   };

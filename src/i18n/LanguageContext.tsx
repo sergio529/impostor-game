@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { translations, Language, Translations } from './translations';
+import storage from '../utils/storage';
 
 interface LanguageContextType {
   language: Language;
@@ -24,7 +24,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   useEffect(() => {
     const loadLanguage = async () => {
       try {
-        const savedLanguage = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
+        const savedLanguage = await storage.getItem(LANGUAGE_STORAGE_KEY);
         if (savedLanguage === 'en' || savedLanguage === 'es') {
           setLanguageState(savedLanguage);
         }
@@ -41,7 +41,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   // Save language when changed
   const setLanguage = async (lang: Language) => {
     try {
-      await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+      await storage.setItem(LANGUAGE_STORAGE_KEY, lang);
       setLanguageState(lang);
     } catch (error) {
       console.warn('Failed to save language preference:', error);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { triggerHaptic } from '../../utils/haptics';
 import { useLanguage, Language } from '../../i18n';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
@@ -14,7 +14,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ style }) => 
   const { language, setLanguage, t } = useLanguage();
 
   const handleLanguageChange = async (lang: Language) => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await triggerHaptic();
     setLanguage(lang);
   };
 
