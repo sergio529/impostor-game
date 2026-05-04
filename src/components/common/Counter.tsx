@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { triggerHaptic } from '../../utils/haptics';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme/spacing';
@@ -27,14 +27,14 @@ export const Counter: React.FC<CounterProps> = ({
 
   const handleDecrement = async () => {
     if (canDecrement) {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      await triggerHaptic();
       onDecrement();
     }
   };
 
   const handleIncrement = async () => {
     if (canIncrement) {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      await triggerHaptic();
       onIncrement();
     }
   };

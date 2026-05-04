@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import * as Haptics from 'expo-haptics';
+import { triggerHaptic } from '../utils/haptics';
 import { ScreenContainer } from '../components/common/ScreenContainer';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
@@ -34,7 +34,7 @@ export const RoleRevealScreen: React.FC = () => {
       }).start();
 
       // Same haptic feedback for all roles (to not reveal by sound)
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      triggerHaptic();
     }, 1500);
 
     return () => clearTimeout(timer);

@@ -25,7 +25,8 @@
       "package": "com.sergio529.impostorgame"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     },
     "plugins": [
       "expo-font"

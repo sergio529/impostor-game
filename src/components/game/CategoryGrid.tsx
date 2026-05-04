@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { triggerHaptic } from '../../utils/haptics';
 import { Category } from '../../types/game';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
@@ -30,7 +30,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
   };
 
   const handleSelect = async (category: Category) => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await triggerHaptic();
     onSelectCategory(category);
   };
 

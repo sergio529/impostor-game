@@ -7,7 +7,7 @@ import {
   TextStyle,
   ActivityIndicator,
 } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { triggerHaptic } from '../../utils/haptics';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme/spacing';
@@ -37,7 +37,7 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   const handlePress = async () => {
     if (!disabled && !loading) {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      await triggerHaptic();
       onPress();
     }
   };
