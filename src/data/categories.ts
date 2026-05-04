@@ -14,7 +14,8 @@ export interface ExtendedCategory extends Category {
  * All game categories with both English and Spanish word lists.
  * The `words` field contains English words (default).
  * The `wordsEs` field contains Spanish translations.
- * Each category has exactly 45 words for consistent replayability.
+ * Most categories have 45 words for consistent replayability.
+ * The colombianBrands category has 65 words (brands + famous people).
  */
 export const defaultCategories: ExtendedCategory[] = [
   {
@@ -241,6 +242,33 @@ export const defaultCategories: ExtendedCategory[] = [
     ],
   },
   {
+    id: 'anime',
+    name: 'Anime',
+    icon: '🎌',
+    words: [
+      'Naruto', 'One Piece', 'Dragon Ball Z', 'Attack on Titan', 'Death Note',
+      'Pokémon', 'Sailor Moon', 'Cowboy Bebop', 'Fullmetal Alchemist', 'Spirited Away',
+      'My Hero Academia', 'Demon Slayer', 'Tokyo Ghoul', 'Sword Art Online', 'Neon Genesis Evangelion',
+      'One Punch Man', 'Hunter x Hunter', 'Bleach', 'Fairy Tail', 'Dragon Ball',
+      'Dragon Ball Super', 'Steins;Gate', 'Code Geass', 'Naruto Shippuden', 'One Piece Film: Red',
+      'Psycho-Pass', 'Mononoke', 'Princess Mononoke', 'Howl\'s Moving Castle', 'Ponyo',
+      'Your Name', 'Weathering with You', 'Ghost in the Shell', 'Akira', 'Nausicaä',
+      'Grave of the Fireflies', 'Paprika', 'Cowboy Bebop: The Movie', 'Samurai Champloo', 'Trigun',
+      'YuYu Hakusho', 'Inuyasha', 'Rurouni Kenshin', 'Gintama', 'The Tatami Galaxy',
+    ],
+    wordsEs: [
+      'Naruto', 'One Piece', 'Dragon Ball Z', 'Attack on Titan', 'Death Note',
+      'Pokémon', 'Sailor Moon', 'Cowboy Bebop', 'Fullmetal Alchemist', 'El Viaje de Chihiro',
+      'My Hero Academia', 'Demon Slayer', 'Tokyo Ghoul', 'Sword Art Online', 'Neon Genesis Evangelion',
+      'One Punch Man', 'Hunter x Hunter', 'Bleach', 'Fairy Tail', 'Dragon Ball',
+      'Dragon Ball Super', 'Steins;Gate', 'Code Geass', 'Naruto Shippuden', 'One Piece Film: Red',
+      'Psycho-Pass', 'Mononoke', 'Princesa Mononoke', 'El Castillo Ambulante', 'Ponyo',
+      'Your Name', 'Weathering with You', 'Ghost in the Shell', 'Akira', 'Nausicaä',
+      'Tumba de las Luciérnagas', 'Paprika', 'Cowboy Bebop: The Movie', 'Samurai Champloo', 'Trigun',
+      'YuYu Hakusho', 'Inuyasha', 'Rurouni Kenshin', 'Gintama', 'The Tatami Galaxy',
+    ],
+  },
+  {
     id: 'colombianBrands',
     name: 'Colombian things',
     icon: '🙈',
@@ -254,6 +282,9 @@ export const defaultCategories: ExtendedCategory[] = [
       'Gelatina de pata', 'Barrilete', 'Arequipe Alpina',
       'Costeñita', 'Pony Malta', 'Cristal', 'La Colina',
       'Gatorade', 'Kola Román', 'Bon Ice', 'Milo', 'Café Oma',
+      'Gabriel García Márquez', 'Shakira', 'Fernando Botero', 'Carlos Vives', 'Sofía Vergara',
+      'James Rodríguez', 'Falcao', 'Manuelita Sáenz', 'Policarpa Salavarrieta', 'Édgar Rentería',
+      'Juanes', 'Maluma', 'J Balvin', 'Tatiana Calderón', 'Camilo',
     ],
     wordsEs: [
       'Chocorramo', 'Alpina', 'Juan Valdez', 'Colanta', 'Postobón', 'Águila',
@@ -265,6 +296,9 @@ export const defaultCategories: ExtendedCategory[] = [
       'Gelatina de pata', 'Barrilete', 'Arequipe Alpina',
       'Costeñita', 'Pony Malta', 'Cristal', 'La Colina',
       'Gatorade', 'Kola Román', 'Bon Ice', 'Milo', 'Café Oma',
+      'Gabriel García Márquez', 'Shakira', 'Fernando Botero', 'Carlos Vives', 'Sofía Vergara',
+      'James Rodríguez', 'Falcao', 'Manuelita Sáenz', 'Policarpa Salavarrieta', 'Édgar Rentería',
+      'Juanes', 'Maluma', 'J Balvin', 'Tatiana Calderón', 'Camilo',
     ],
   },
 ];
